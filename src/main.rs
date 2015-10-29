@@ -1,3 +1,4 @@
+extern crate piston;
+
 fn main() {
-    println!("Hello, world!");
 }
