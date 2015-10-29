@@ -6,3 +6,4 @@ authors = ["Axel Magnuson <axelmagn@gmail.com>"]
 [dependencies]
 piston = "0.13"
 piston_window = "0.25"
+toml = "0.1"
