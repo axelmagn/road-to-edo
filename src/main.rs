@@ -1,12 +1,11 @@
-extern crate piston;
-extern crate piston_window;
+extern crate glium;
 extern crate toml;
 
 use std::io::{Read};
 use std::fs::File;
 use std::path::Path;
 
-use piston_window::{WindowSettings, PistonWindow, clear};
+use glium::{DisplayBuild, Surface};
 
 const DEFAULT_CONF_PATH: &'static str = "conf";
 const DEFAULT_SETTINGS_CONF: &'static str = "settings.toml";
@@ -26,16 +25,21 @@ fn main() {
         .as_integer().unwrap() as u32;
     let height: u32 = settings["window"].lookup("height").unwrap()
         .as_integer().unwrap() as u32;
-    let window: PistonWindow = WindowSettings::new(
-        "Hello Piston!", (width, height))
-        .exit_on_esc(true)
-        .build()
-        .unwrap_or_else(|e| { panic!("Failed to build PistonWindow: {}", e) });
+    let display = glium::glutin::WindowBuilder::new()
+        .with_dimensions(width, height)
+        .build_glium().unwrap();
 
-    // game loop
-    for e in window {
-        e.draw_2d(|_c, g| {
-            clear([0.5, 1.0, 0.5, 1.0], g);
-        });
+    loop {
+        let mut target = display.draw();
+        target.clear_color(0.0, 0.3, 0.5, 1.0);
+        target.finish().unwrap();
+
+        for ev in display.poll_events() {
+            match ev {
+                glium::glutin::Event::Closed => return,
+                _ => (),
+            }
+        }
     }
+
 }
