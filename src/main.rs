@@ -26,11 +26,13 @@ fn main() {
         .as_integer().unwrap() as u32;
     let height: u32 = settings["window"].lookup("height").unwrap()
         .as_integer().unwrap() as u32;
-    let window: PistonWindow = WindowSettings::new("Hello Piston!", 
-                                                   (width, height))
+    let window: PistonWindow = WindowSettings::new(
+        "Hello Piston!", (width, height))
         .exit_on_esc(true)
         .build()
         .unwrap_or_else(|e| { panic!("Failed to build PistonWindow: {}", e) });
+
+    // game loop
     for e in window {
         e.draw_2d(|_c, g| {
             clear([0.5, 1.0, 0.5, 1.0], g);
