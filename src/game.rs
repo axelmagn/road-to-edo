@@ -1,14 +1,15 @@
-use render::RenderGroup;
+use render::{RenderGroup, Renderer};
 
 use glium::{Surface, Frame, DrawError};
 
 pub struct Game {
-    renderer: Renderer,
+    // renderer: Renderer,
+    foo: f64,
 }
 
 impl Game {
     pub fn new() -> Game {
-        Game { render_groups: Renderer::new() }
+        Game { renderer: Renderer::new() }
     }
 
     pub fn render(&self, target: &mut Frame) -> Result<(), DrawError> {
