@@ -6,6 +6,7 @@ extern crate toml;
 
 #[macro_use]
 mod render;
+mod game;
 
 use std::io::{Read, Cursor};
 use std::fs::File;
@@ -55,6 +56,8 @@ fn main() {
         glium::texture::MipmapsOption::NoMipmap,
         1024, 1024).unwrap();
 
+    let game = game::Game::new();
+
 
     loop {
         // blit the whole tilemap over to dest
@@ -74,8 +77,12 @@ fn main() {
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.3, 0.8, 1.0);
+        game.render(&mut target);
+        /*
         dest_tex.as_surface().fill(
             &target, glium::uniforms::MagnifySamplerFilter::Linear);
+        */
+
         target.finish().unwrap();
 
 
