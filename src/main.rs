@@ -1,6 +1,11 @@
+extern crate nalgebra;
+#[macro_use]
 extern crate glium;
 extern crate image;
 extern crate toml;
+
+#[macro_use]
+mod render;
 
 use std::io::{Read, Cursor};
 use std::fs::File;
@@ -9,8 +14,10 @@ use std::path::Path;
 use glium::{DisplayBuild, Surface};
 use glium::glutin;
 
+
 const DEFAULT_CONF_PATH: &'static str = "conf";
 const DEFAULT_SETTINGS_CONF: &'static str = "settings.toml";
+
 
 fn main() {
     // load environment config
@@ -52,15 +59,18 @@ fn main() {
     loop {
         // blit the whole tilemap over to dest
         dest_tex.as_surface().clear_color(0.0, 0.3, 0.8, 1.0);
+
         let dest_rect = glium::BlitTarget {
             left: 0,
             bottom: 0,
             width: dest_tex.get_width() as i32,
             height: dest_tex.get_height().unwrap() as i32,
         };
+
         tiles_tex.as_surface().blit_whole_color_to(
             &dest_tex.as_surface(), &dest_rect, 
             glium::uniforms::MagnifySamplerFilter::Linear);
+
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.3, 0.8, 1.0);
