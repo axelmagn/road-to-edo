@@ -41,21 +41,24 @@ pub struct Renderer {
     // params: DrawParameters,
 }
 
+// keys for settings
 pub const RENDER_SETTINGS_KEY: &'static str = "render";
 pub const VERTEX_SHADER_KEY: &'static str = "shaders.vertex";
 pub const FRAGMENT_SHADER_KEY: &'static str = "shaders.fragment";
 
 /// The renderer contains graphics-related information
 impl Renderer {
-    pub fn new<F>(display: &F, settings: &toml::Table) -> Renderer where F: Facade {
-        let program = Renderer::load_program(display, 
-                                             &settings[RENDER_SETTINGS_KEY])
-            .unwrap();
-        Renderer {
-            render_groups: Vec::new(),
-            program: program,
+    /// create a new renderer
+    pub fn new<F>(display: &F, settings: &toml::Table) -> Renderer 
+        where F: Facade {
+            let program = Renderer::load_program(
+                display, &settings[RENDER_SETTINGS_KEY])
+                .unwrap();
+            Renderer {
+                render_groups: Vec::new(),
+                program: program,
+            }
         }
-    }
 
     /// utility function to load a shader string from file
     fn load_shader_string(key: &str, settings: &toml::Value) 
@@ -99,17 +102,14 @@ impl Renderer {
             let fragment_shader = match fragment_shader {
                 Ok(v) => v,
                 Err(e) => return Err(
-                ProgramCreationError::CompilationError(e)),
+                    ProgramCreationError::CompilationError(e)),
             };
 
             Program::from_source(facade, &vertex_shader, &fragment_shader, 
                                  None)
         }
 
-
-
-
-
+    /// Render all render groups to a frame
     pub fn render(&self, target: &mut Frame) -> Result<(), DrawError> {
         target.clear_color(0.5, 0.5, 0.8, 1.0);
         for group in self.render_groups.iter() {
@@ -117,8 +117,22 @@ impl Renderer {
                 atlas: &group.atlas,
                 view_matrix: Mat4::new_identity(4),
             };
-            // target.draw(&group.vertices, 
+            target.draw(&group.vertices, &group.indices, &self.program,
+                        &uniform, &Default::default()).unwrap();
         }
         Ok(())
+    }
+
+    /// Add a render group that is a static image
+    pub fn add_image_group(&mut self, image: Frame) {
+        let vertex1 = Vertex { position: [-1.0, -1.0], tex_coords: [0.0, 0.0] };
+        let vertex2 = Vertex { position: [-1.0,  1.0], tex_coords: [0.0, 1.0] };
+        let vertex3 = Vertex { position: [ 1.0,  1.0], tex_coords: [1.0, 1.0] };
+        let shape = vec![vertex1, vertex2, vertex3];
+
+        let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
+        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+        let texture = glium::texture::Texture2d::new(&display, image).unwrap();
+
     }
 }
