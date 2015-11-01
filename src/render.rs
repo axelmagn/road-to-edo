@@ -1,15 +1,16 @@
-use std::rc::Rc;
+use std::cell::RefCell;
 use std::fs::File;
 use std::io::Read;
+use std::rc::Rc;
 
-use nalgebra::Vec2;
-use glium::{DisplayBuild, Surface, DrawError, Program, ProgramCreationError, 
-    Frame, GliumCreationError};
+use nalgebra::{Vec2, Mat4, Identity, Eye};
+use glium::{self, DisplayBuild, Surface, DrawError, Program, 
+    ProgramCreationError, Frame, GliumCreationError};
 use glium::backend::Facade;
 use glium::backend::glutin_backend::GlutinFacade;
 use glium::draw_parameters::DrawParameters;
 use glium::glutin::{WindowBuilder, CreationError};
-use glium::index::{self, IndexBuffer};
+use glium::index::{self, IndexBuffer, NoIndices, IndicesSource};
 use glium::texture::Texture2d;
 use glium::uniforms::Uniforms;
 use glium::vertex::VertexBuffer;
@@ -26,49 +27,32 @@ pub struct Vertex {
 
 implement_vertex!(Vertex, position, tex_coords);
 
-
-#[derive(Copy, Clone)]
-pub struct GlobalUniforms {
-    pub view_coords: Vec2<f32>,
-    pub view_size: Vec2<f32>,
-}
-
-pub struct RenderGroupUniforms {
-    /// texture atlas to use
-    pub atlas: Rc<Texture2d>,
-}
-
-
 pub struct RenderGroup {
+    /// verts to render
     pub vertices: VertexBuffer<Vertex>,
-    pub uniforms: RenderGroupUniforms,
+    /// Texture atlas
+    pub atlas: Texture2d,
+    pub indices: NoIndices,
 }
 
 pub struct Renderer {
     render_groups: Vec<RenderGroup>,
-    display: GlutinFacade,
     program: Program,
     // params: DrawParameters,
 }
 
 pub const RENDER_SETTINGS_KEY: &'static str = "render";
-pub const WINDOW_SETTINGS_KEY: &'static str = "window";
 pub const VERTEX_SHADER_KEY: &'static str = "shaders.vertex";
 pub const FRAGMENT_SHADER_KEY: &'static str = "shaders.fragment";
-pub const WINDOW_WIDTH_KEY: &'static str = "width";
-pub const WINDOW_HEIGHT_KEY: &'static str = "height";
 
 /// The renderer contains graphics-related information
 impl Renderer {
-    pub fn new(settings: &toml::Table) -> Renderer {
-        let display = Renderer::load_display(&settings[WINDOW_SETTINGS_KEY])
-            .unwrap();
-        let program = Renderer::load_program(&display, 
+    pub fn new<F>(display: &F, settings: &toml::Table) -> Renderer where F: Facade {
+        let program = Renderer::load_program(display, 
                                              &settings[RENDER_SETTINGS_KEY])
             .unwrap();
         Renderer {
             render_groups: Vec::new(),
-            display: display,
             program: program,
         }
     }
@@ -123,27 +107,17 @@ impl Renderer {
         }
 
 
-    /// Load a glium display from settings
-    fn load_display(settings: &toml::Value) 
-        -> Result<GlutinFacade, GliumCreationError<CreationError>> {
-            // TODO: come back at some point and fix return value so that we
-            // don't have to panic if we can't read settings
-            let width: u32 = settings.lookup(WINDOW_WIDTH_KEY)
-                .and_then(|v| v.as_integer())
-                .unwrap() as u32;
-            let height: u32 = settings.lookup(WINDOW_HEIGHT_KEY)
-                .and_then(|v| v.as_integer())
-                .unwrap() as u32;
-            WindowBuilder::new()
-                .with_dimensions(width, height)
-                .build_glium()
-        }
 
 
 
     pub fn render(&self, target: &mut Frame) -> Result<(), DrawError> {
-        target.clear_color(1.0, 0.3, 0.8, 1.0);
+        target.clear_color(0.5, 0.5, 0.8, 1.0);
         for group in self.render_groups.iter() {
+            let uniform = uniform! {
+                atlas: &group.atlas,
+                view_matrix: Mat4::new_identity(4),
+            };
+            // target.draw(&group.vertices, 
         }
         Ok(())
     }

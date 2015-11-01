@@ -12,13 +12,33 @@ use std::io::{Read, Cursor};
 use std::fs::File;
 use std::path::Path;
 
-use glium::{DisplayBuild, Surface};
-use glium::glutin;
+use glium::{DisplayBuild, Surface, GliumCreationError};
+use glium::glutin::{self, WindowBuilder, CreationError};
+use glium::backend::glutin_backend::GlutinFacade;
 
 
 const DEFAULT_CONF_PATH: &'static str = "conf";
 const DEFAULT_SETTINGS_CONF: &'static str = "settings.toml";
 
+pub const WINDOW_SETTINGS_KEY: &'static str = "window";
+pub const WINDOW_WIDTH_KEY: &'static str = "width";
+pub const WINDOW_HEIGHT_KEY: &'static str = "height";
+
+/// Load a glium display from settings
+pub fn load_display(settings: &toml::Value) 
+    -> Result<GlutinFacade, GliumCreationError<CreationError>> {
+        // TODO: come back at some point and fix return value so that we
+        // don't have to panic if we can't read settings
+        let width: u32 = settings.lookup(WINDOW_WIDTH_KEY)
+            .and_then(|v| v.as_integer())
+            .unwrap() as u32;
+        let height: u32 = settings.lookup(WINDOW_HEIGHT_KEY)
+            .and_then(|v| v.as_integer())
+            .unwrap() as u32;
+        WindowBuilder::new()
+            .with_dimensions(width, height)
+            .build_glium()
+    }
 
 fn main() {
     // load environment config
@@ -39,6 +59,10 @@ fn main() {
         .with_dimensions(width, height)
         .with_vsync()
         .build_glium().unwrap();
+    // initialize window to a blank color
+    let mut target = display.draw();
+    target.clear_color(0.0, 0.3, 0.8, 1.0);
+    target.finish();
 
     // load tile sheet
     let tiles_img = image::load(
@@ -56,7 +80,7 @@ fn main() {
         glium::texture::MipmapsOption::NoMipmap,
         1024, 1024).unwrap();
 
-    let game = game::Game::new(&settings);
+    let game = game::Game::new(&display, &settings);
 
 
     loop {
@@ -76,8 +100,8 @@ fn main() {
 
 
         let mut target = display.draw();
-        target.clear_color(0.0, 0.3, 0.8, 1.0);
-        game.render(&mut target);
+        // target.clear_color(0.0, 0.3, 0.8, 1.0);
+        game.render(&mut target).unwrap();
         /*
         dest_tex.as_surface().fill(
             &target, glium::uniforms::MagnifySamplerFilter::Linear);
