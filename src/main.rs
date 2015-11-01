@@ -62,7 +62,7 @@ fn main() {
     // initialize window to a blank color
     let mut target = display.draw();
     target.clear_color(0.0, 0.3, 0.8, 1.0);
-    target.finish();
+    target.finish().unwrap();
 
     // load tile sheet
     let tiles_img = image::load(

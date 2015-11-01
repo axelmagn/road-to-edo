@@ -1,9 +1,11 @@
 use render::{RenderGroup, Renderer};
 
 use std::io::Cursor;
+use std::rc::Rc;
 
 use glium::{Surface, Frame, DrawError};
 use glium::backend::Facade;
+use glium::texture::Texture2d;
 use image;
 use toml;
 
@@ -20,7 +22,10 @@ impl Game {
                     "../assets/tiles/lpc_atlas01/terrain_atlas.png"
                     )[..]
                 ), image::PNG).unwrap();
-        g.renderer.add_image_group(display, image);
+
+        let texture = Texture2d::new(display, image).unwrap();
+        let texture = Rc::new(texture);
+        g.renderer.add_fullscreen_image_group(display, texture.clone());
 
         g
     }

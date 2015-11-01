@@ -32,7 +32,7 @@ pub struct RenderGroup {
     /// verts to render
     pub vertices: VertexBuffer<Vertex>,
     /// Texture atlas
-    pub atlas: Texture2d,
+    pub atlas: Rc<Texture2d>,
     pub indices: NoIndices,
 }
 
@@ -119,7 +119,7 @@ impl Renderer {
         };
         for group in self.render_groups.iter() {
             let uniform = uniform! {
-                atlas: &group.atlas,
+                atlas: &*group.atlas,
                 view_matrix: Mat4::new_identity(4),
             };
             target.draw(&group.vertices, &group.indices, &self.program,
@@ -129,8 +129,8 @@ impl Renderer {
     }
 
     /// Add a render group that is a static image
-    pub fn add_image_group<F>(&mut self, display: &F, image: DynamicImage) 
-        where F: Facade {
+    pub fn add_fullscreen_image_group<F>(&mut self, display: &F, 
+                                         texture: Rc<Texture2d>) where F: Facade {
         let vertex1 = Vertex { 
             position: Vec2::new(-1.0,  1.0), 
             tex_coords: Vec2::new(0.0, 1.0) 
@@ -149,11 +149,9 @@ impl Renderer {
         };
         let shape = vec![vertex1, vertex2, vertex3, vertex4];
 
-        let vertex_buffer = glium::VertexBuffer::new(
-            display, &shape).unwrap();
+        let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
         let indices = glium::index::NoIndices(
             glium::index::PrimitiveType::TriangleStrip);
-        let texture = glium::texture::Texture2d::new(display, image).unwrap();
 
         let group = RenderGroup {
             vertices: vertex_buffer,
