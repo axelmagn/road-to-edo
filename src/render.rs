@@ -14,6 +14,7 @@ use glium::index::{self, IndexBuffer, NoIndices, IndicesSource};
 use glium::texture::Texture2d;
 use glium::uniforms::Uniforms;
 use glium::vertex::VertexBuffer;
+use image::DynamicImage;
 use toml;
 
 
@@ -112,35 +113,54 @@ impl Renderer {
     /// Render all render groups to a frame
     pub fn render(&self, target: &mut Frame) -> Result<(), DrawError> {
         target.clear_color(0.5, 0.5, 0.8, 1.0);
+        let params = DrawParameters {
+            blend: glium::Blend::alpha_blending(),
+            .. Default::default()
+        };
         for group in self.render_groups.iter() {
             let uniform = uniform! {
                 atlas: &group.atlas,
                 view_matrix: Mat4::new_identity(4),
             };
             target.draw(&group.vertices, &group.indices, &self.program,
-                        &uniform, &Default::default()).unwrap();
+                        &uniform, &params).unwrap();
         }
         Ok(())
     }
 
     /// Add a render group that is a static image
-    pub fn add_image_group<F>(&mut self, display: &F, image: Frame) where F: Facade {
+    pub fn add_image_group<F>(&mut self, display: &F, image: DynamicImage) 
+        where F: Facade {
         let vertex1 = Vertex { 
-            position: Vec2::new(-1.0, -1.0), 
-            tex_coords: Vec2::new(0.0, 0.0) 
-        };
-        let vertex2 = Vertex { 
             position: Vec2::new(-1.0,  1.0), 
             tex_coords: Vec2::new(0.0, 1.0) 
+        };
+        let vertex2 = Vertex { 
+            position: Vec2::new(-1.0, -1.0), 
+            tex_coords: Vec2::new(0.0, 0.0) 
         };
         let vertex3 = Vertex { 
             position: Vec2::new(1.0,  1.0), 
             tex_coords: Vec2::new(1.0, 1.0) 
         };
-        let shape = vec![vertex1, vertex2, vertex3];
+        let vertex4 = Vertex { 
+            position: Vec2::new(1.0, -1.0), 
+            tex_coords: Vec2::new(1.0, 0.0) 
+        };
+        let shape = vec![vertex1, vertex2, vertex3, vertex4];
 
-        let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
-        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+        let vertex_buffer = glium::VertexBuffer::new(
+            display, &shape).unwrap();
+        let indices = glium::index::NoIndices(
+            glium::index::PrimitiveType::TriangleStrip);
         let texture = glium::texture::Texture2d::new(display, image).unwrap();
+
+        let group = RenderGroup {
+            vertices: vertex_buffer,
+            atlas: texture,
+            indices: indices,
+        };
+
+        self.render_groups.push(group);
     }
 }
