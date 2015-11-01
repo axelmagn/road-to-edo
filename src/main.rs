@@ -56,7 +56,7 @@ fn main() {
         glium::texture::MipmapsOption::NoMipmap,
         1024, 1024).unwrap();
 
-    let game = game::Game::new();
+    let game = game::Game::new(&settings);
 
 
     loop {

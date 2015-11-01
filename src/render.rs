@@ -8,7 +8,7 @@ use glium::{DisplayBuild, Surface, DrawError, Program, ProgramCreationError,
 use glium::backend::Facade;
 use glium::backend::glutin_backend::GlutinFacade;
 use glium::draw_parameters::DrawParameters;
-use glium::glutin::CreationError;
+use glium::glutin::{WindowBuilder, CreationError};
 use glium::index::{self, IndexBuffer};
 use glium::texture::Texture2d;
 use glium::uniforms::Uniforms;
@@ -60,20 +60,25 @@ pub const WINDOW_HEIGHT_KEY: &'static str = "height";
 
 /// The renderer contains graphics-related information
 impl Renderer {
-    /*
     pub fn new(settings: &toml::Table) -> Renderer {
+        let display = Renderer::load_display(&settings[WINDOW_SETTINGS_KEY])
+            .unwrap();
+        let program = Renderer::load_program(&display, 
+                                             &settings[RENDER_SETTINGS_KEY])
+            .unwrap();
         Renderer {
             render_groups: Vec::new(),
+            display: display,
+            program: program,
         }
     }
-    */
 
     /// utility function to load a shader string from file
     fn load_shader_string(key: &str, settings: &toml::Value) 
         -> Result<String, String> {
             match settings.lookup(key) {
-                Some(&toml::Value::String(v)) => {
-                    let f = match File::open(v) {
+                Some(&toml::Value::String(ref v)) => {
+                    let mut f = match File::open(v) {
                         Ok(f) => f,
                         Err(_) => return Err(
                             format!("Could not open shader file {}", v)),
@@ -95,6 +100,8 @@ impl Renderer {
     fn load_program<F>(facade: &F, settings: &toml::Value) 
         -> Result<Program, ProgramCreationError> where F: Facade {
 
+            // TODO: come back at some point and fix return value so that
+            // settings error are a different error.
             let vertex_shader = Renderer::load_shader_string(
                 VERTEX_SHADER_KEY, &settings);
             let vertex_shader = match vertex_shader {
@@ -111,19 +118,25 @@ impl Renderer {
                 ProgramCreationError::CompilationError(e)),
             };
 
-            Program::from_source(facade, &vertex_shader, &fragment_shader, None)
+            Program::from_source(facade, &vertex_shader, &fragment_shader, 
+                                 None)
         }
 
 
     /// Load a glium display from settings
     fn load_display(settings: &toml::Value) 
         -> Result<GlutinFacade, GliumCreationError<CreationError>> {
+            // TODO: come back at some point and fix return value so that we
+            // don't have to panic if we can't read settings
             let width: u32 = settings.lookup(WINDOW_WIDTH_KEY)
                 .and_then(|v| v.as_integer())
-                .and_then(|v| v as u32);
+                .unwrap() as u32;
             let height: u32 = settings.lookup(WINDOW_HEIGHT_KEY)
                 .and_then(|v| v.as_integer())
-                .and_then(|v| v as u32);
+                .unwrap() as u32;
+            WindowBuilder::new()
+                .with_dimensions(width, height)
+                .build_glium()
         }
 
 
