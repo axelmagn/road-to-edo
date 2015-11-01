@@ -6,6 +6,7 @@ dependencies = [
  "glutin 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "image 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "nalgebra 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tiled 0.1.4 (git+https://github.com/axelmagn/rs-tiled.git)",
  "toml 0.1.23 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -460,6 +461,16 @@ dependencies = [
  "libc 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "tiled"
+version = "0.1.4"
+source = "git+https://github.com/axelmagn/rs-tiled.git#31fc55836b76b23c1483bc59286cb7d7f087b4c2"
+dependencies = [
+ "flate2 0.2.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rustc-serialize 0.3.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "xml-rs 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
