@@ -124,15 +124,23 @@ impl Renderer {
     }
 
     /// Add a render group that is a static image
-    pub fn add_image_group(&mut self, image: Frame) {
-        let vertex1 = Vertex { position: [-1.0, -1.0], tex_coords: [0.0, 0.0] };
-        let vertex2 = Vertex { position: [-1.0,  1.0], tex_coords: [0.0, 1.0] };
-        let vertex3 = Vertex { position: [ 1.0,  1.0], tex_coords: [1.0, 1.0] };
+    pub fn add_image_group<F>(&mut self, display: &F, image: Frame) where F: Facade {
+        let vertex1 = Vertex { 
+            position: Vec2::new(-1.0, -1.0), 
+            tex_coords: Vec2::new(0.0, 0.0) 
+        };
+        let vertex2 = Vertex { 
+            position: Vec2::new(-1.0,  1.0), 
+            tex_coords: Vec2::new(0.0, 1.0) 
+        };
+        let vertex3 = Vertex { 
+            position: Vec2::new(1.0,  1.0), 
+            tex_coords: Vec2::new(1.0, 1.0) 
+        };
         let shape = vec![vertex1, vertex2, vertex3];
 
-        let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
+        let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-        let texture = glium::texture::Texture2d::new(&display, image).unwrap();
-
+        let texture = glium::texture::Texture2d::new(display, image).unwrap();
     }
 }
