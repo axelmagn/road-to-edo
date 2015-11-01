@@ -3,7 +3,12 @@ name = "road-to-edo"
 version = "0.1.0"
 authors = ["Axel Magnuson <axelmagn@gmail.com>"]
 
+[dependencies.glium]
+version = "0.10"
+features = ["image", "nalgebra"]
+
 [dependencies]
-glium = "0.10"
 glutin = "0.4"
 toml = "0.1"
+image = "0.3"
+nalgebra = "0.3"

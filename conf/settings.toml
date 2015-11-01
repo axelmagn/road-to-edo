@@ -1,3 +1,7 @@
 [window]
-width = 800
-height = 600
+width = 1024
+height = 1024
+
+[render.shaders]
+vertex = "src/shaders/shader.vert"
+fragment = "src/shaders/shader.frag"
