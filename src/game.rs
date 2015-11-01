@@ -1,9 +1,9 @@
-use render::{RenderGroup, Renderer};
+use render::Renderer;
 
 use std::io::Cursor;
 use std::rc::Rc;
 
-use glium::{Surface, Frame, DrawError};
+use glium::{Frame, DrawError};
 use glium::backend::Facade;
 use glium::texture::Texture2d;
 use image;

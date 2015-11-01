@@ -1,20 +1,14 @@
-use std::cell::RefCell;
 use std::fs::File;
 use std::io::Read;
 use std::rc::Rc;
 
-use nalgebra::{Vec2, Mat4, Identity, Eye};
-use glium::{self, DisplayBuild, Surface, DrawError, Program, 
-    ProgramCreationError, Frame, GliumCreationError};
+use nalgebra::{Vec2, Mat4, Eye};
+use glium::{self, Surface, DrawError, Program, ProgramCreationError, Frame};
 use glium::backend::Facade;
-use glium::backend::glutin_backend::GlutinFacade;
 use glium::draw_parameters::DrawParameters;
-use glium::glutin::{WindowBuilder, CreationError};
-use glium::index::{self, IndexBuffer, NoIndices, IndicesSource};
+use glium::index::NoIndices;
 use glium::texture::Texture2d;
-use glium::uniforms::Uniforms;
 use glium::vertex::VertexBuffer;
-use image::DynamicImage;
 use toml;
 
 
