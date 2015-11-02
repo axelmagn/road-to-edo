@@ -25,7 +25,8 @@ impl Game {
 
         let texture = Texture2d::new(display, image).unwrap();
         let texture = Rc::new(texture);
-        g.renderer.add_fullscreen_image_group(display, texture.clone());
+        g.renderer.add_fullscreen_image_group(display, texture.clone())
+            .unwrap();
 
         g
     }

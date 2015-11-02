@@ -6,9 +6,9 @@ use nalgebra::{Vec2, Mat4, Eye};
 use glium::{self, Surface, DrawError, Program, ProgramCreationError, Frame};
 use glium::backend::Facade;
 use glium::draw_parameters::DrawParameters;
-use glium::index::NoIndices;
+use glium::index::{NoIndices, PrimitiveType};
 use glium::texture::Texture2d;
-use glium::vertex::VertexBuffer;
+use glium::vertex::{VertexBuffer, BufferCreationError};
 use toml;
 
 
@@ -123,36 +123,41 @@ impl Renderer {
     }
 
     /// Add a render group that is a static image
-    pub fn add_fullscreen_image_group<F>(&mut self, display: &F, 
-                                         texture: Rc<Texture2d>) where F: Facade {
-        let vertex1 = Vertex { 
-            position: Vec2::new(-1.0,  1.0), 
-            tex_coords: Vec2::new(0.0, 1.0) 
-        };
-        let vertex2 = Vertex { 
-            position: Vec2::new(-1.0, -1.0), 
-            tex_coords: Vec2::new(0.0, 0.0) 
-        };
-        let vertex3 = Vertex { 
-            position: Vec2::new(1.0,  1.0), 
-            tex_coords: Vec2::new(1.0, 1.0) 
-        };
-        let vertex4 = Vertex { 
-            position: Vec2::new(1.0, -1.0), 
-            tex_coords: Vec2::new(1.0, 0.0) 
-        };
-        let shape = vec![vertex1, vertex2, vertex3, vertex4];
+    pub fn add_fullscreen_image_group<F>(
+        &mut self, display: &F, texture: Rc<Texture2d>) 
+        -> Result<usize, BufferCreationError> 
+        where F: Facade {
+            let vertex1 = Vertex { 
+                position: Vec2::new(-1.0,  1.0), 
+                tex_coords: Vec2::new(0.0, 1.0) 
+            };
+            let vertex2 = Vertex { 
+                position: Vec2::new(-1.0, -1.0), 
+                tex_coords: Vec2::new(0.0, 0.0) 
+            };
+            let vertex3 = Vertex { 
+                position: Vec2::new(1.0,  1.0), 
+                tex_coords: Vec2::new(1.0, 1.0) 
+            };
+            let vertex4 = Vertex { 
+                position: Vec2::new(1.0, -1.0), 
+                tex_coords: Vec2::new(1.0, 0.0) 
+            };
+            let shape = vec![vertex1, vertex2, vertex3, vertex4];
 
-        let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
-        let indices = glium::index::NoIndices(
-            glium::index::PrimitiveType::TriangleStrip);
+            let vertex_buffer = VertexBuffer::new(display, &shape);
+            let vertex_buffer = match vertex_buffer {
+                Ok(v) => v,
+                Err(e) => return Err(e),
+            };
+            let indices = NoIndices(PrimitiveType::TriangleStrip);
 
-        let group = RenderGroup {
-            vertices: vertex_buffer,
-            atlas: texture,
-            indices: indices,
-        };
-
-        self.render_groups.push(group);
-    }
+            let group = RenderGroup {
+                vertices: vertex_buffer,
+                atlas: texture,
+                indices: indices,
+            };
+            self.render_groups.push(group);
+            Ok(self.render_groups.len()-1)
+        }
 }
